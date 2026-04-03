@@ -10,6 +10,7 @@ python app.py
 
 # Open the URL printed in the terminal (usually http://127.0.0.1:7860).
 # Stop the server with Ctrl + C.
+```
 
 # RecapAI Backend — Integration Guide
 
