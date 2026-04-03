@@ -1,1 +1,11 @@
+# ── Frontend ──
 gradio
+
+# ── Backend (inference) ──
+python-dotenv
+huggingface-hub>=0.20.0
+
+# ── Backend (local mode only — uncomment if running model on your own GPU) ──
+# torch
+# transformers
+# accelerate
