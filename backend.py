@@ -136,6 +136,9 @@ Rules:
 - Keep the summary concise (3-5 sentences).
 - Decisions are concrete outcomes agreed upon.
 - Open questions are items that were raised but NOT resolved.
+- Do NOT duplicate tasks or decisions.
+- Each assigned task must match exactly one speaker in the transcript.
+- Do not infer or hallucinate extra tasks.
 """
 
 
@@ -151,38 +154,95 @@ def _build_messages(transcript: str) -> list[dict[str, str]]:
 # JSON extraction from (potentially messy) LLM output
 # ---------------------------------------------------------------------------
 
+
 def _extract_json(text: str) -> dict[str, Any]:
     """Try multiple strategies to pull a JSON object from model output."""
-    # Strategy 1: direct parse
     text = text.strip()
+
+    if not text:
+        raise ValueError("Model returned empty output.")
+
+    # Some models return the whole JSON body wrapped as a quoted string
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in ('"', "'"):
+        text = text[1:-1].strip()
+
+    # Strategy 1: direct parse
     try:
         return json.loads(text)
     except json.JSONDecodeError:
         pass
 
-    # Strategy 2: strip markdown fences
-    fenced = re.search(r"```(?:json)?\s*\n?(.*?)\n?\s*```", text, re.DOTALL)
+    # Strategy 2: remove markdown fences
+    fenced = re.search(
+        r"```(?:json)?\s*\n?(.*?)\n?\s*```",
+        text,
+        re.DOTALL | re.IGNORECASE,
+    )
     if fenced:
+        candidate = fenced.group(1).strip()
         try:
-            return json.loads(fenced.group(1).strip())
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            text = candidate
+
+    # Strategy 3: try wrapping if braces are missing
+    candidate = text
+    if not candidate.startswith("{"):
+        candidate = "{" + candidate
+    if not candidate.endswith("}"):
+        candidate = candidate + "}"
+
+    candidate = re.sub(r",\s*([}\]])", r"\1", candidate)
+
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+
+    # Strategy 4: schema-specific salvage parser
+    repaired: dict[str, Any] = {
+        "summary": "",
+        "decisions": [],
+        "assigned_tasks": [],
+        "open_questions": [],
+    }
+
+    # summary
+    m = re.search(r'"summary"\s*:\s*"(.*?)"\s*,\s*"decisions"', text, re.DOTALL)
+    if m:
+        repaired["summary"] = m.group(1).strip()
+
+    # decisions
+    m = re.search(r'"decisions"\s*:\s*(\[[\s\S]*?\])\s*,\s*"assigned_tasks"', text, re.DOTALL)
+    if m:
+        try:
+            repaired["decisions"] = json.loads(m.group(1))
         except json.JSONDecodeError:
             pass
 
-    # Strategy 3: find first { … } block
-    brace_match = re.search(r"\{.*\}", text, re.DOTALL)
-    if brace_match:
+    # assigned_tasks
+    m = re.search(r'"assigned_tasks"\s*:\s*(\[[\s\S]*?\])\s*,\s*"open_questions"', text, re.DOTALL)
+    if m:
         try:
-            return json.loads(brace_match.group(0))
+            repaired["assigned_tasks"] = json.loads(m.group(1))
         except json.JSONDecodeError:
             pass
 
-    # Strategy 4: lenient — try fixing common issues (trailing commas)
-    if brace_match:
-        cleaned = re.sub(r",\s*([}\]])", r"\1", brace_match.group(0))
+    # open_questions
+    m = re.search(r'"open_questions"\s*:\s*(\[[\s\S]*?\])\s*$', text, re.DOTALL)
+    if m:
         try:
-            return json.loads(cleaned)
+            repaired["open_questions"] = json.loads(m.group(1))
         except json.JSONDecodeError:
             pass
+
+    if (
+        repaired["summary"]
+        or repaired["decisions"]
+        or repaired["assigned_tasks"]
+        or repaired["open_questions"]
+    ):
+        return repaired
 
     raise ValueError(f"Could not extract JSON from model output:\n{text[:500]}")
 
