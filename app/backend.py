@@ -37,7 +37,8 @@ import os
 import re
 from typing import Any
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
+from huggingface_hub import login
 
 load_dotenv()  # reads .env in project root
 
@@ -47,6 +48,14 @@ load_dotenv()  # reads .env in project root
 MODEL_ID: str = os.getenv("RECAPAI_MODEL", "meta-llama/Llama-3.2-1B-Instruct")
 MODE: str = os.getenv("RECAPAI_MODE", "api").lower()          # "api" | "local"
 HF_TOKEN: str | None = os.getenv("HF_TOKEN") or os.getenv("HF_API_TOKEN")
+
+if not HF_TOKEN:
+    print("Enter your Hugging Face token when prompted, then press Enter.")
+    HF_TOKEN = input("HF Token: ").strip()
+    set_key(".env", "HF_TOKEN", HF_TOKEN)
+    print("Token saved to .env")
+
+login(token=HF_TOKEN)
 MAX_NEW_TOKENS: int = int(os.getenv("RECAPAI_MAX_TOKENS", "1024"))
 CHUNK_SIZE: int = int(os.getenv("RECAPAI_CHUNK_SIZE", "1500"))  # max chars per chunk
 
