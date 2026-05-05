@@ -13,25 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app'))
 from backend import summarize_transcript
 
 SAMPLE_TRANSCRIPT = """\
-Alice: Good morning everyone. Let's get started. First item — the Q3 marketing budget.
-
-Bob: I've reviewed the numbers. I think we should increase digital ad spend by 15% and cut print by 10%.
-
-Alice: That sounds reasonable. Any objections? … Okay, let's go with that.
-
-Carol: I'll update the budget spreadsheet by Friday and send it to finance.
-
-Bob: Also, are we still planning the product launch event for October 12th?
-
-Alice: That's still TBD — we need to confirm the venue. Carol, can you check availability at the Marriott and the Hilton?
-
-Carol: Sure, I'll have options by next Wednesday.
-
-Alice: Great. One more thing — Dave mentioned he wants to revisit the onboarding flow, but he's out today. Let's table that for the next meeting.
-
-Bob: Agreed. Should we invite the design team to that discussion?
-
-Alice: Good idea, but let's decide that when Dave is here. Alright, meeting adjourned.
+Okay so let's just get going, we're already like five minutes late. Yeah sorry, I was on another call. So what are we starting with? The budget stuff. I sent the numbers around yesterday, did everyone get a chance to look? I did, and honestly I think we should just go with the digital increase, print's not doing anything for us. Agreed, let's cut print by ten and move it over. We good on that? Okay moving on. Hey quick thing, someone needs to update the spreadsheet and get it over to finance before Friday. Yeah I can do that, I'll have it over by Friday no problem. Cool. Uh what about the October launch event, are we still on for the 12th? That's still up in the air, we haven't locked down a venue yet. Can you check on the Marriott and maybe one other option and get back to us by next week? Sure, I'll have something by Wednesday. Okay good. Last thing, Dave wanted to talk about the onboarding flow but he's out today so let's just push that to next time. Should we loop in the design team for that conversation? Probably yeah but let's wait until Dave's back and decide then. Alright that's everything I think, talk soon.
 """
 
 
