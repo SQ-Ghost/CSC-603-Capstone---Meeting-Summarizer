@@ -6,6 +6,10 @@ Run:  python test_backend.py
 Requires .env to be configured (see .env.example).
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'app'))
+
 from backend import summarize_transcript
 
 SAMPLE_TRANSCRIPT = """\
