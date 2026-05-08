@@ -39,8 +39,13 @@ from typing import Any
 
 from dotenv import load_dotenv, set_key
 from huggingface_hub import login
+from pathlib import Path
 
-load_dotenv()  # reads .env in project root
+#load_dotenv()  # reads .env in project root
+BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_PATH = BASE_DIR / ".env"
+
+load_dotenv(dotenv_path=ENV_PATH)
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -52,7 +57,8 @@ HF_TOKEN: str | None = os.getenv("HF_TOKEN") or os.getenv("HF_API_TOKEN")
 if not HF_TOKEN:
     print("Enter your Hugging Face token when prompted, then press Enter.")
     HF_TOKEN = input("HF Token: ").strip()
-    set_key(".env", "HF_TOKEN", HF_TOKEN)
+    #set_key(".env", "HF_TOKEN", HF_TOKEN)
+    set_key(str(ENV_PATH), "HF_API_TOKEN", HF_TOKEN)
     print("Token saved to .env")
 
 login(token=HF_TOKEN)
