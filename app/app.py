@@ -112,7 +112,7 @@ def run_summary(transcript_text: str, transcript_file, filename: str):
 
 def clear_all():
     """Reset all UI fields."""
-    return "", None, "recapai_summary", "", {}, None, None, ""
+    return "", None, "recapai_summary", "", {}, None, None, "", ""
 
 
 custom_css = """
