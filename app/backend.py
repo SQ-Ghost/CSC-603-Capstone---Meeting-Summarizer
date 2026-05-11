@@ -37,16 +37,31 @@ import os
 import re
 from typing import Any
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key
+from huggingface_hub import login
+from pathlib import Path
 
-load_dotenv()  # reads .env in project root
+#load_dotenv()  # reads .env in project root
+BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_PATH = BASE_DIR / ".env"
+
+load_dotenv(dotenv_path=ENV_PATH)
 
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
 MODEL_ID: str = os.getenv("RECAPAI_MODEL", "meta-llama/Llama-3.2-1B-Instruct")
 MODE: str = os.getenv("RECAPAI_MODE", "api").lower()          # "api" | "local"
-HF_TOKEN: str | None = os.getenv("HF_API_TOKEN")
+HF_TOKEN: str | None = os.getenv("HF_TOKEN") or os.getenv("HF_API_TOKEN")
+
+if not HF_TOKEN:
+    print("Enter your Hugging Face token when prompted, then press Enter.")
+    HF_TOKEN = input("HF Token: ").strip()
+    #set_key(".env", "HF_TOKEN", HF_TOKEN)
+    set_key(str(ENV_PATH), "HF_API_TOKEN", HF_TOKEN)
+    print("Token saved to .env")
+
+login(token=HF_TOKEN)
 MAX_NEW_TOKENS: int = int(os.getenv("RECAPAI_MAX_TOKENS", "1024"))
 CHUNK_SIZE: int = int(os.getenv("RECAPAI_CHUNK_SIZE", "1500"))  # max chars per chunk
 
@@ -259,7 +274,7 @@ def _extract_json(text: str) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 def _infer_api(transcript: str) -> str:
-    """Call HuggingFace Inference API."""
+    """Call HuggingFace Inference API using chat completion."""
     from huggingface_hub import InferenceClient
 
     if not HF_TOKEN:
@@ -269,15 +284,21 @@ def _infer_api(transcript: str) -> str:
             "and add it to your .env file."
         )
 
-    client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
+    client = InferenceClient(
+        provider="novita",
+        api_key=HF_TOKEN,
+    )
+
     messages = _build_messages(transcript)
 
     response = client.chat_completion(
+        model=MODEL_ID,
         messages=messages,
         max_tokens=MAX_NEW_TOKENS,
-        temperature=0.2,          # low temp for structured output
+        temperature=0.2,
         top_p=0.9,
     )
+
     return response.choices[0].message.content
 
 
