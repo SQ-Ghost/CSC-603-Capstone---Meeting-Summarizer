@@ -1,7 +1,25 @@
 # CSC-603-Capstone---Meeting-Summarizer
 
-UI - Gradio - How to run locally
-## Run UI locally (Windows PowerShell)
+A meeting summarizer powered by Llama 3.2 that generates structured JSON outputs with summaries, decisions, assigned tasks, and open questions.
+
+## Project Structure
+
+| File/Folder | Purpose |
+|---|---|
+| `notebooks/RecapAI.ipynb` | **Colab notebook** — AI-powered meeting transcript generation and summarization with interactive evaluation |
+| `app.py` | **Gradio frontend** — Web UI for uploading transcripts and viewing summaries |
+| `backend.py` | **Core backend** — LLM inference, JSON parsing, schema validation |
+| `requirements.txt` | Python dependencies |
+| `.env.example` | Template for environment variables (copy to `.env` and add your HF token) |
+| `test_backend.py` | Standalone smoke-test for the backend |
+| `Transcripts/` | Stores input transcripts (text files) |
+| `Summaries/` | Stores generated summaries (JSON) |
+| `Evaluations/` | Stores evaluation results with scores |
+| `EvaluationRuns/` | Timestamped evaluation run histories |
+
+---
+
+## Quick Start — Local UI (Windows PowerShell)
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -11,6 +29,30 @@ python app.py
 # Open the URL printed in the terminal (usually http://127.0.0.1:7860).
 # Stop the server with Ctrl + C.
 ```
+
+---
+
+## Colab Notebook (RecapAI.ipynb)
+
+**Link:** https://colab.research.google.com/github/SQ-Ghost/CSC-603-Capstone---Meeting-Summarizer/blob/main/notebooks/RecapAI.ipynb
+
+### Requirements
+- **Hugging Face API Token** — Required to access Llama 3.2 model
+  - Get one free at https://huggingface.co/settings/tokens
+  - Copy your token when prompted in the Colab notebook
+
+### Features
+- **Mock Transcript Generator** — Creates realistic office meeting transcripts
+- **Transcript Summarizer** — Chunks long transcripts and generates JSON summaries
+- **Automated Evaluation** — Scores summaries on clarity, faithfulness, decisions, and tasks
+- **Prompt Improvement Suggestions** — Identifies issues and suggests refinements
+
+### How to Run in Colab
+1. Open the notebook link above
+2. Run each cell in order
+3. When prompted, paste your Hugging Face API token
+4. Generate mock transcripts and evaluate them
+5. Review evaluation scores and suggested improvements
 
 # RecapAI Backend — Integration Guide
 
